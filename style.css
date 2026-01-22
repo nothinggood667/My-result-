@@ -1,0 +1,61 @@
+:root {
+    --bg: #0d1117;
+    --glass: rgba(22, 27, 34, 0.8);
+    --primary: #58a6ff;
+    --text: #c9d1d9;
+    --border: #30363d;
+}
+
+body {
+    margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text);
+}
+
+.container { max-width: 600px; margin: 0 auto; }
+.admin-container { max-width: 1000px; margin: 0 auto; }
+
+.text-center { text-align: center; }
+.neon-text { color: var(--primary); text-shadow: 0 0 10px rgba(88, 166, 255, 0.5); }
+
+/* Glass Effect */
+.glass {
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; backdrop-filter: blur(10px);
+}
+
+/* Inputs & Buttons */
+input {
+    width: 100%; padding: 10px; margin: 10px 0;
+    background: #0d1117; border: 1px solid var(--border);
+    color: white; border-radius: 5px; box-sizing: border-box;
+}
+
+button {
+    background: var(--primary); border: none; padding: 10px 20px;
+    color: #000; font-weight: bold; border-radius: 5px; cursor: pointer;
+    transition: 0.3s;
+}
+button:hover { box-shadow: 0 0 15px var(--primary); }
+
+/* TABLE STYLES (Most Important) */
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+th { background: rgba(255,255,255,0.05); color: var(--primary); }
+tr:hover { background: rgba(255,255,255,0.02); }
+
+/* Result Specific */
+.student-info { border-bottom: 1px solid var(--border); margin-bottom: 10px; padding-bottom: 10px; }
+.student-info h2 { margin: 0; color: white; }
+
+/* Admin Specific */
+.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.full-width { grid-column: span 2; margin-top: 10px; }
+.form-panel { margin-bottom: 20px; }
+
+.del-btn { background: #ff0055; color: white; padding: 5px 10px; }
+
+/* Responsive */
+@media (max-width: 600px) {
+    .grid-form { grid-template-columns: 1fr; }
+    .full-width { grid-column: span 1; }
+}

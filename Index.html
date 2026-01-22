@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Result Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header class="text-center">
+            <h1 class="neon-text">STUDENT PORTAL</h1>
+            <p>Enter your Roll Number to check result</p>
+        </header>
+
+        <div class="search-box glass">
+            <input type="number" id="searchRoll" placeholder="Enter Roll Number (e.g. 101)">
+            <button onclick="findResult()">Check Result</button>
+        </div>
+
+        <div id="resultArea" class="glass" style="display: none; margin-top: 20px;">
+            <div class="student-info">
+                <h2 id="sName">Student Name</h2>
+                <p>Roll No: <span id="sRoll"></span> | Class: <span id="sClass"></span></p>
+            </div>
+
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody id="marksBody">
+                    </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total</td>
+                        <td id="sTotal">000</td>
+                        <td id="sStatus">PASS</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAabSKiYR-IFHbKYUWIGVadjC95Z0Q4I4",
+            authDomain: "database-792c9.firebaseapp.com",
+            projectId: "database-792c9",
+            storageBucket: "database-792c9.firebasestorage.app",
+            messagingSenderId: "709827137119",
+            appId: "1:709827137119:web:c9357850544e0cbc0055ea"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.findResult = async () => {
+            const roll = document.getElementById('searchRoll').value;
+            if(!roll) return alert("Please enter Roll Number");
+
+            const btn = document.querySelector('button');
+            btn.innerText = "Searching...";
+
+            // Search Logic
+            const q = query(collection(db, "results"), where("roll", "==", roll));
+            const snapshot = await getDocs(q);
+
+            if(snapshot.empty) {
+                alert("No result found for Roll No: " + roll);
+                document.getElementById('resultArea').style.display = 'none';
+                btn.innerText = "Check Result";
+                return;
+            }
+
+            // Show Data
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                document.getElementById('sName').innerText = data.name;
+                document.getElementById('sRoll').innerText = data.roll;
+                document.getElementById('sClass').innerText = data.class;
+                document.getElementById('sTotal').innerText = data.total + "/500";
+                
+                const statusElem = document.getElementById('sStatus');
+                statusElem.innerText = data.percentage >= 33 ? "PASS" : "FAIL";
+                statusElem.style.color = data.percentage >= 33 ? "#00ff88" : "#ff0055";
+
+                // Table Rows
+                const tbody = document.getElementById('marksBody');
+                tbody.innerHTML = `
+                    <tr><td>Physics</td><td>${data.phy}</td><td>${getGrade(data.phy)}</td></tr>
+                    <tr><td>Chemistry</td><td>${data.chem}</td><td>${getGrade(data.chem)}</td></tr>
+                    <tr><td>Maths</td><td>${data.math}</td><td>${getGrade(data.math)}</td></tr>
+                    <tr><td>English</td><td>${data.eng}</td><td>${getGrade(data.eng)}</td></tr>
+                    <tr><td>Computer</td><td>${data.comp}</td><td>${getGrade(data.comp)}</td></tr>
+                `;
+                document.getElementById('resultArea').style.display = 'block';
+            });
+            btn.innerText = "Check Result";
+        }
+
+        function getGrade(marks) {
+            if(marks >= 90) return 'A+';
+            if(marks >= 80) return 'A';
+            if(marks >= 70) return 'B';
+            if(marks >= 60) return 'C';
+            if(marks >= 33) return 'D';
+            return 'F';
+        }
+    </script>
+</body>
+</html>

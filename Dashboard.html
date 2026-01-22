@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="admin-container">
+        <h1 class="neon-text">ADMIN DASHBOARD</h1>
+        
+        <div class="glass form-panel">
+            <h3>Upload New Result</h3>
+            <form id="resultForm" class="grid-form">
+                <input type="text" id="name" placeholder="Student Name" required>
+                <input type="number" id="roll" placeholder="Roll No" required>
+                <input type="text" id="class" placeholder="Class (e.g. 12th A)" required>
+                
+                <input type="number" id="phy" placeholder="Physics Marks" required>
+                <input type="number" id="chem" placeholder="Chemistry Marks" required>
+                <input type="number" id="math" placeholder="Maths Marks" required>
+                <input type="number" id="eng" placeholder="English Marks" required>
+                <input type="number" id="comp" placeholder="Computer Marks" required>
+                
+                <button type="submit" class="full-width">Upload Result</button>
+            </form>
+        </div>
+
+        <div class="glass table-panel">
+            <h3>All Students Record</h3>
+            <div class="table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Total</th>
+                            <th>%</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAabSKiYR-IFHbKYUWIGVadjC95Z0Q4I4",
+            authDomain: "database-792c9.firebaseapp.com",
+            projectId: "database-792c9",
+            storageBucket: "database-792c9.firebasestorage.app",
+            messagingSenderId: "709827137119",
+            appId: "1:709827137119:web:c9357850544e0cbc0055ea"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 1. Upload Logic
+        document.getElementById('resultForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get Values
+            const name = document.getElementById('name').value;
+            const roll = document.getElementById('roll').value;
+            const stdClass = document.getElementById('class').value;
+            const phy = Number(document.getElementById('phy').value);
+            const chem = Number(document.getElementById('chem').value);
+            const math = Number(document.getElementById('math').value);
+            const eng = Number(document.getElementById('eng').value);
+            const comp = Number(document.getElementById('comp').value);
+
+            // Calculate Result
+            const total = phy + chem + math + eng + comp;
+            const percentage = (total / 500) * 100;
+
+            try {
+                await addDoc(collection(db, "results"), {
+                    name, roll, class: stdClass,
+                    phy, chem, math, eng, comp,
+                    total, percentage,
+                    date: Date.now()
+                });
+                alert("Result Uploaded Successfully!");
+                e.target.reset();
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        });
+
+        // 2. Load Table Logic
+        onSnapshot(collection(db, "results"), (snapshot) => {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${data.roll}</td>
+                    <td>${data.name}</td>
+                    <td>${data.total}</td>
+                    <td>${data.percentage.toFixed(1)}%</td>
+                    <td style="color:${data.percentage >= 33 ? '#0f0' : '#f00'}">
+                        ${data.percentage >= 33 ? 'PASS' : 'FAIL'}
+                    </td>
+                    <td><button onclick="delResult('${docSnap.id}')" class="del-btn">X</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+
+        // 3. Delete Logic
+        window.delResult = async (id) => {
+            if(confirm("Delete this student result?")) {
+                await deleteDoc(doc(db, "results", id));
+            }
+        }
+    </script>
+</body>
+</html>
